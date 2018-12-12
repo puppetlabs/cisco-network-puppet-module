@@ -16,6 +16,9 @@ require 'puppet/resource_api/simple_provider'
 # Implementation for the snmp_notification_receiver type using the Resource API.
 class Puppet::Provider::SnmpNotificationReceiver::CiscoNexus < Puppet::ResourceApi::SimpleProvider
   def canonicalize(_context, resources)
+    resources.each do |resource|
+      resource[:port] = nil if resource[:port] == (-1 || 'unset')
+    end
     resources
   end
 
@@ -53,6 +56,9 @@ class Puppet::Provider::SnmpNotificationReceiver::CiscoNexus < Puppet::ResourceA
 
   def update(context, name, should)
     validate_should(should)
+    # existing receiver needs to be deleted before updating
+    @snmp_notification_receivers ||= Cisco::SnmpNotificationReceiver.receivers
+    @snmp_notification_receivers[name].destroy if @snmp_notification_receivers[name]
     context.notice("Setting '#{name}' with #{should.inspect}")
     Cisco::SnmpNotificationReceiver.new(name,
                                         instantiate:      true,
@@ -69,6 +75,8 @@ class Puppet::Provider::SnmpNotificationReceiver::CiscoNexus < Puppet::ResourceA
 
   def munge(val)
     if val.is_a?(String) && val.eql?('unset')
+      nil
+    elsif val.is_a?(Integer) && val.eql?(-1)
       nil
     elsif val.is_a?(Integer)
       val.to_s

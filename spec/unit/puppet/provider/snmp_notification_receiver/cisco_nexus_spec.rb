@@ -202,6 +202,9 @@ RSpec.describe Puppet::Provider::SnmpNotificationReceiver::CiscoNexus do
       expect(provider.munge(46)).to eq '46'
     }
     it {
+      expect(provider.munge(-1)).to eq nil
+    }
+    it {
       expect(provider.munge('unset')).to eq nil
     }
     it {

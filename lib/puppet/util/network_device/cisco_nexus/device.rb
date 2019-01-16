@@ -8,7 +8,7 @@ module Puppet::Util::NetworkDevice::Cisco_nexus # rubocop:disable Style/ClassAnd
       super
       Cisco::Environment.add_env('default',
                                  host:        config['address'],
-                                 port:        config['port'],
+                                 port:        config['port'] ? config['port'].to_i : nil,
                                  transport:   config['transport'],
                                  verify_mode: config['verify_mode'],
                                  username:    config['username'],
